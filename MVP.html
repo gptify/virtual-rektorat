@@ -1,0 +1,1810 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Rektorat AI — OTM Boshqaruv Platformasi</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --navy:   #0D1B3E;
+  --navy2:  #1A3A6B;
+  --blue:   #2563EB;
+  --blt:    #EFF6FF;
+  --gold:   #F59E0B;
+  --white:  #FFFFFF;
+  --gray:   #64748B;
+  --light:  #F1F5FB;
+  --border: #E2E8F0;
+  --green:  #059669;
+  --purple: #7C3AED;
+  --red:    #DC2626;
+  --orange: #D97706;
+  --teal:   #0891B2;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: var(--light); color: var(--navy); overflow: hidden; }
+
+/* ── TOP BAR ── */
+.topbar {
+  background: var(--navy);
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  border-bottom: 2px solid var(--gold);
+}
+.topbar-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 17px; font-weight: 800; color: #fff; letter-spacing: -0.3px;
+}
+.topbar-logo em { color: var(--gold); font-style: normal; }
+.topbar-right { display: flex; align-items: center; gap: 16px; }
+
+.univ-select-wrap {
+  display: flex; align-items: center; gap: 8px;
+}
+.univ-select {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff; padding: 6px 12px; border-radius: 8px;
+  font-size: 12px; font-weight: 600; outline: none; cursor: pointer;
+  transition: all 0.15s;
+}
+.univ-select option { background: var(--navy); color: #fff; }
+.univ-select:hover { background: rgba(255,255,255,0.15); }
+
+.api-wrap {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px; padding: 5px 12px;
+}
+.api-wrap label { font-size: 10px; color: rgba(255,255,255,0.45); white-space: nowrap; }
+#apiKey {
+  background: none; border: none; color: #fff;
+  font-size: 12px; width: 180px; outline: none; font-family: monospace;
+}
+.status-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green); box-shadow: 0 0 0 2px rgba(5,150,105,0.3);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+.chip {
+  font-size: 10px; font-weight: 700; padding: 4px 10px;
+  border-radius: 20px; letter-spacing: 0.3px;
+}
+
+/* ── SHELL ── */
+.shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  height: calc(100vh - 60px);
+}
+
+/* ── NAV ── */
+.nav {
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  padding: 16px 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.nav-top { flex: 1; }
+.nav-section { padding: 0 14px 6px; margin-top: 14px; }
+.nav-section:first-child { margin-top: 0; }
+.nav-label {
+  font-size: 9.5px; font-weight: 700; color: var(--gray);
+  letter-spacing: 1.2px; text-transform: uppercase;
+  padding: 0 4px 6px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 10px;
+  border: none; background: none; cursor: pointer;
+  border-radius: 8px; text-align: left;
+  transition: all 0.12s; position: relative;
+  margin-bottom: 2px;
+}
+.nav-item:hover { background: var(--light); }
+.nav-item.active { background: var(--blt); }
+.nav-item.active::after {
+  content: ''; position: absolute; right: 0; top: 4px; bottom: 4px;
+  width: 3px; border-radius: 2px 0 0 2px; background: var(--blue);
+}
+.ni-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.ni-text { flex: 1; min-width: 0; }
+.ni-name { font-size: 12px; font-weight: 600; color: var(--navy); line-height: 1.3; }
+.ni-sub { font-size: 10px; color: var(--gray); margin-top: 1px; }
+.ni-badge {
+  font-size: 9px; font-weight: 700; padding: 2px 6px;
+  border-radius: 10px; flex-shrink: 0;
+}
+.nav-divider { height: 1px; background: var(--border); margin: 10px 14px; }
+.nav-footer { padding: 16px; border-top: 1px solid var(--border); text-align: center; }
+.nav-footer-text { font-size: 10px; color: var(--gray); }
+
+/* ── CONTENT ── */
+.content { overflow-y: auto; height: 100%; }
+
+/* ── PAGE ── */
+.page { display: none; padding: 24px; }
+.page.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── REKTOR DASHBOARD ── */
+.dash-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; margin-bottom: 24px;
+  flex-wrap: wrap; gap: 16px;
+}
+.dash-title h1 {
+  font-size: 24px; font-weight: 800; color: var(--navy);
+}
+.dash-title p { font-size: 13px; color: var(--gray); margin-top: 4px; }
+.dash-actions { display: flex; gap: 10px; }
+.btn {
+  padding: 10px 20px; border-radius: 10px; border: none;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'Inter', sans-serif; transition: all 0.15s;
+}
+.btn-primary { background: var(--navy); color: #fff; }
+.btn-primary:hover { background: var(--navy2); }
+.btn-outline { background: #fff; color: var(--navy); border: 1.5px solid var(--border); }
+.btn-outline:hover { border-color: var(--navy); }
+.btn-success { background: var(--green); color: #fff; }
+.btn-success:hover { background: #047857; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Stat cards */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px; margin-bottom: 24px;
+}
+.stat-card {
+  background: #fff; border-radius: 14px;
+  padding: 18px; border: 1px solid var(--border);
+  position: relative; overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+.stat-card::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 4px;
+}
+.stat-num { font-size: 28px; font-weight: 800; margin-bottom: 4px; }
+.stat-label { font-size: 12px; color: var(--gray); font-weight: 550; }
+.stat-change {
+  font-size: 11px; font-weight: 600; margin-top: 6px;
+  display: flex; align-items: center; gap: 4px;
+}
+
+/* Section */
+.section { background: #fff; border-radius: 14px; border: 1px solid var(--border); margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+.sec-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+}
+.sec-head h3 { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.sec-body { padding: 20px; }
+
+/* Agent status cards */
+.agents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+}
+.agent-card {
+  border: 1px solid var(--border); border-radius: 12px;
+  overflow: hidden; cursor: pointer; transition: all 0.15s;
+  background: var(--white);
+}
+.agent-card:hover { border-color: var(--blue); box-shadow: 0 4px 14px rgba(37,99,235,0.08); transform: translateY(-2px); }
+.ac-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; border-bottom: 1px solid var(--border);
+}
+.ac-icon {
+  width: 36px; height: 36px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+}
+.ac-name { font-size: 12.5px; font-weight: 700; color: var(--navy); line-height: 1.3; }
+.ac-status { margin-left: auto; }
+.ac-body { padding: 14px; }
+.ac-stat { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.ac-stat-label { font-size: 11px; color: var(--gray); }
+.ac-stat-val { font-size: 11px; font-weight: 600; color: var(--navy); }
+.progress-bar {
+  height: 5px; background: var(--border); border-radius: 2.5px; margin-top: 10px;
+  overflow: hidden;
+}
+.progress-fill { height: 100%; border-radius: 2.5px; transition: width 0.8s ease-in-out; }
+
+/* AI Analysis box */
+.ai-box {
+  background: var(--navy); border-radius: 14px;
+  padding: 24px; margin-bottom: 24px; position: relative; overflow: hidden;
+  box-shadow: 0 4px 20px rgba(13,27,62,0.15);
+}
+.ai-box::before {
+  content: ''; position: absolute;
+  top: -30px; right: -30px; width: 120px; height: 120px;
+  border-radius: 50%; background: rgba(37,99,235,0.25);
+}
+.ai-box-header {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+}
+.ai-box-icon {
+  width: 44px; height: 44px; background: var(--gold);
+  border-radius: 12px; display: flex; align-items: center;
+  justify-content: center; font-size: 22px; flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(245,158,11,0.3);
+}
+.ai-box-title { font-size: 16px; font-weight: 750; color: #fff; }
+.ai-box-sub { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+.ai-box-content {
+  font-size: 13.5px; line-height: 1.7;
+  color: rgba(255,255,255,0.85); white-space: pre-wrap; min-height: 60px;
+}
+.ai-box-actions { display: flex; gap: 12px; margin-top: 20px; }
+.btn-gold { background: var(--gold); color: var(--navy); font-weight: 700; box-shadow: 0 4px 10px rgba(245,158,11,0.2); }
+.btn-gold:hover { background: #e08f0a; }
+.btn-ghost { background: rgba(255,255,255,0.1); color: #fff; }
+.btn-ghost:hover { background: rgba(255,255,255,0.15); }
+
+/* HEMIS */
+.hemis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+.hemis-card {
+  border: 1px solid var(--border); border-radius: 12px; padding: 16px;
+  background: var(--white);
+}
+.hemis-num { font-size: 24px; font-weight: 800; margin: 6px 0 2px; }
+.hemis-label { font-size: 11px; color: var(--gray); font-weight: 600; }
+.hemis-trend { font-size: 11px; font-weight: 600; margin-top: 6px; }
+
+/* Table */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  text-align: left; padding: 12px 14px;
+  font-size: 11px; font-weight: 700; color: var(--gray);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+  background: #f8fafc;
+}
+td {
+  padding: 12px 14px; border-bottom: 1px solid var(--border);
+  color: var(--navy);
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--light); }
+
+/* Alert */
+.alert {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 16px; border-radius: 10px; margin-bottom: 12px;
+  font-size: 13px; line-height: 1.5;
+}
+.alert-warn { background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; }
+.alert-info { background: var(--blt); border: 1px solid #BFDBFE; color: #1E40AF; }
+.alert-success { background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; }
+.alert-danger { background: #FFF5F5; border: 1px solid #FECACA; color: #991B1B; }
+
+/* Form */
+.form-group { margin-bottom: 16px; }
+.form-label { font-size: 12.5px; font-weight: 600; color: var(--navy); margin-bottom: 6px; display: block; }
+.form-input, .form-select, .form-textarea {
+  width: 100%; padding: 11px 14px; border: 1.5px solid var(--border);
+  border-radius: 9px; font-size: 13px; font-family: 'Inter', sans-serif;
+  color: var(--navy); background: #fff; outline: none;
+  transition: border-color 0.15s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--blue);
+}
+.form-textarea { resize: vertical; min-height: 120px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* Loading */
+.loading {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--gray);
+}
+.spinner {
+  width: 18px; height: 18px; border: 2px solid var(--border);
+  border-top-color: var(--blue); border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Badge */
+.badge-green { background: #ECFDF5; color: #059669; }
+.badge-orange { background: #FFFBEB; color: #D97706; }
+.badge-red { background: #FFF5F5; color: #DC2626; }
+.badge-blue { background: var(--blt); color: var(--blue); }
+.badge-purple { background: #F5F3FF; color: var(--purple); }
+
+/* AI Yig'ilish Simulator Styles */
+.yigilis-container { display: flex; flex-direction: column; gap: 16px; }
+.agent-chat-card {
+  background: var(--white); border-radius: 12px; border: 1.5px solid var(--border);
+  overflow: hidden; opacity: 0.5; transform: scale(0.98);
+  transition: all 0.4s ease-in-out;
+}
+.agent-chat-card.active-agent {
+  opacity: 1; transform: scale(1); border-color: var(--blue);
+  box-shadow: 0 4px 20px rgba(37,99,235,0.12);
+}
+.agent-chat-card.completed-agent {
+  opacity: 0.9; transform: scale(1); border-color: var(--green);
+}
+.acc-header {
+  display: flex; align-items: center; gap: 12px; padding: 12px 18px;
+  border-bottom: 1px solid var(--border); background: #f8fafc;
+}
+.acc-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.acc-title { font-size: 13px; font-weight: 700; color: var(--navy); }
+.acc-status-lbl { font-size: 10px; margin-left: auto; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.acc-body { padding: 16px 18px; font-size: 13px; line-height: 1.6; color: var(--navy); white-space: pre-wrap; }
+
+.typing-indicator {
+  display: flex; align-items: center; gap: 4px; padding: 4px 0;
+}
+.typing-dot {
+  width: 6px; height: 6px; background: var(--gray); border-radius: 50%;
+  animation: typingBounce 1.4s infinite ease-in-out both;
+}
+.typing-dot:nth-child(1) { animation-delay: -0.32s; }
+.typing-dot:nth-child(2) { animation-delay: -0.16s; }
+@keyframes typingBounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+
+/* Notify */
+#notify {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--navy); color: #fff;
+  padding: 14px 22px; border-radius: 12px;
+  font-size: 13px; font-weight: 600; z-index: 999;
+  display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  border-left: 4px solid var(--gold);
+  animation: slideIn 0.3s forwards;
+}
+@keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* Responsive */
+@media (max-width: 850px) {
+  .shell { grid-template-columns: 1fr; }
+  .nav { display: none; }
+  .form-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-logo">
+    🏛️ Virtual <em>Rektorat</em> AI 
+    <span id="headerUnivName" style="font-size:12px;color:rgba(255,255,255,0.45);font-weight:400;margin-left:6px;">— TDIU</span>
+  </div>
+  <div class="topbar-right">
+    <div class="univ-select-wrap">
+      <span style="font-size:11px;color:rgba(255,255,255,0.5);font-weight:600;">OTM:</span>
+      <select class="univ-select" id="univSelect" onchange="changeUniversity()">
+        <option value="TDIU">Tashkent State University of Economics (TDIU)</option>
+        <option value="TUIT">Tashkent University of Information Technologies (TUIT)</option>
+        <option value="TTA">Tashkent Medical Academy (TTA)</option>
+        <option value="NUUz">National University of Uzbekistan (NUUz)</option>
+      </select>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <div class="status-dot"></div>
+      <span style="font-size:11px;color:rgba(255,255,255,0.5);">Gemini 2.0 Flash</span>
+    </div>
+    <div class="api-wrap">
+      <label>API Key:</label>
+      <input type="password" id="apiKey" placeholder="Gemini API Key (AIzaSy...)" />
+    </div>
+    <span class="chip" style="background:var(--gold);color:var(--navy);">Web MVP v2.2</span>
+  </div>
+</header>
+
+<div class="shell">
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-top">
+    <div class="nav-section">
+      <div class="nav-label">Boshqaruv markazi</div>
+      <button class="nav-item active" id="btn-dashboard" onclick="showPage('dashboard')">
+        <div class="ni-icon" style="background:#EEF2FF;">🏛️</div>
+        <div class="ni-text">
+          <div class="ni-name">Rektor Dashboard</div>
+          <div class="ni-sub">Umumiy holat</div>
+        </div>
+      </button>
+      <button class="nav-item" id="btn-hemis" onclick="showPage('hemis')">
+        <div class="ni-icon" style="background:#ECFDF5;">🗄️</div>
+        <div class="ni-text">
+          <div class="ni-name">HEMIS Ma'lumotlar</div>
+          <div class="ni-sub">Integratsiya</div>
+        </div>
+        <span class="ni-badge" style="background:#ECFDF5;color:#059669;">LIVE</span>
+      </button>
+    </div>
+
+    <div class="nav-divider"></div>
+
+    <div class="nav-section">
+      <div class="nav-label">Prorektorlar</div>
+      <button class="nav-item" id="btn-oquv" onclick="showPage('oquv')">
+        <div class="ni-icon" style="background:#EFF6FF;">📚</div>
+        <div class="ni-text">
+          <div class="ni-name">O'quv ishlari</div>
+          <div class="ni-sub">Kvota • Akkreditatsiya</div>
+        </div>
+      </button>
+      <button class="nav-item" id="btn-ilmiy" onclick="showPage('ilmiy')">
+        <div class="ni-icon" style="background:#F5F3FF;">🔬</div>
+        <div class="ni-text">
+          <div class="ni-name">Ilmiy ishlar</div>
+          <div class="ni-sub">Tadqiqot • Nashrlar</div>
+        </div>
+      </button>
+      <button class="nav-item" id="btn-yoshlar" onclick="showPage('yoshlar')">
+        <div class="ni-icon" style="background:#FFFBEB;">👥</div>
+        <div class="ni-text">
+          <div class="ni-name">Yoshlar masalalari</div>
+          <div class="ni-sub">Ma'naviy-ma'rifiy</div>
+        </div>
+      </button>
+      <button class="nav-item" id="btn-talaba" onclick="showPage('talaba')">
+        <div class="ni-icon" style="background:#FFF5F5;">🎓</div>
+        <div class="ni-text">
+          <div class="ni-name">Talabalar masalalari</div>
+          <div class="ni-sub">O'zlashtirish • Muammolar</div>
+        </div>
+      </button>
+    </div>
+
+    <div class="nav-divider"></div>
+
+    <div class="nav-section">
+      <div class="nav-label">Tyutorlar</div>
+      <button class="nav-item" id="btn-tyutor" onclick="showPage('tyutor')">
+        <div class="ni-icon" style="background:#F0FDF4;">👨‍🏫</div>
+        <div class="ni-text">
+          <div class="ni-name">Tyutor hisobotlar</div>
+          <div class="ni-sub">Yuklash • Tahlil</div>
+        </div>
+      </button>
+    </div>
+
+    <div class="nav-divider"></div>
+
+    <div class="nav-section">
+      <div class="nav-label">AI Yig'ilish</div>
+      <button class="nav-item" id="btn-yigilis" onclick="showPage('yigilis')">
+        <div class="ni-icon" style="background:#FFF0F3;">🤖</div>
+        <div class="ni-text">
+          <div class="ni-name">AI Yig'ilish</div>
+          <div class="ni-sub">5 agent parallel tahlil</div>
+        </div>
+        <span class="ni-badge" style="background:#FFF0F3;color:#DC2626;">NEW</span>
+      </button>
+    </div>
+  </div>
+  <div class="nav-footer">
+    <span class="nav-footer-text">Virtual Rektorat AI © 2026</span>
+  </div>
+</nav>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- ═══════════════════════════════════════
+       REKTOR DASHBOARD
+  ═══════════════════════════════════════ -->
+  <div class="page active" id="page-dashboard">
+    <div class="dash-header">
+      <div class="dash-title">
+        <h1 id="dashMainTitle">Rektor Boshqaruv Markazi</h1>
+        <p>Barcha bo'limlar holati real vaqtda kuzatilmoqda • <span id="curDate"></span></p>
+      </div>
+      <div class="dash-actions">
+        <button class="btn btn-outline" onclick="refreshDashboard()">🔄 Yangilash</button>
+        <button class="btn btn-primary" onclick="showPage('yigilis')">🤖 AI Yig'ilish o'tkazish</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stat-grid" id="dashboardStats">
+      <div class="stat-card" style="border-top:4px solid #2563EB;">
+        <div class="stat-label">Jami talabalar</div>
+        <div class="stat-num" id="stat-total-students" style="color:#2563EB;">8,420</div>
+        <div class="stat-change" style="color:#059669;">↑ 12% o'tgan yilga nisbatan</div>
+      </div>
+      <div class="stat-card" style="border-top:4px solid #059669;">
+        <div class="stat-label">O'rtacha GPA</div>
+        <div class="stat-num" id="stat-average-gpa" style="color:#059669;">3.41</div>
+        <div class="stat-change" style="color:#059669;">↑ 0.08 ball oshgan</div>
+      </div>
+      <div class="stat-card" style="border-top:4px solid #7C3AED;">
+        <div class="stat-label">Ilmiy nashrlar (Scopus)</div>
+        <div class="stat-num" id="stat-scientific-pubs" style="color:#7C3AED;">147</div>
+        <div class="stat-change" style="color:#059669;">↑ 23 ta yangi maqola</div>
+      </div>
+      <div class="stat-card" style="border-top:4px solid #F59E0B;">
+        <div class="stat-label">Tyutor hisobotlari</div>
+        <div class="stat-num" id="stat-tutor-reports" style="color:#F59E0B;">94%</div>
+        <div class="stat-change" style="color:#059669;">↑ O'z vaqtida topshirilgan</div>
+      </div>
+      <div class="stat-card" style="border-top:4px solid #DC2626;">
+        <div class="stat-label">Xavf guruhidagi talabalar</div>
+        <div class="stat-num" id="stat-risk-students" style="color:#DC2626;">312</div>
+        <div class="stat-change" style="color:#DC2626;">↑ Diqqat talab etiladi</div>
+      </div>
+    </div>
+
+    <!-- AI Rektor tahlil -->
+    <div class="ai-box" id="rektorAiBox">
+      <div class="ai-box-header">
+        <div class="ai-box-icon">🏛️</div>
+        <div>
+          <div class="ai-box-title" id="rektorAiTitle">AI Rektor — TDIU Strategik Tahlili</div>
+          <div class="ai-box-sub">Barcha bo'limlar va HEMIS ma'lumotlari asosida yaratilgan tizimli hisobot</div>
+        </div>
+        <button class="btn btn-ghost" id="btn-rektor-refresh" onclick="generateRektorAnalysis()" style="margin-left:auto;">
+          ✨ Yangi tahlil
+        </button>
+      </div>
+      <div class="ai-box-content" id="rektorAnalysis">⏳ "AI Tahlil olish" tugmasini bosib, tizimdan kunlik tahlilni oling yoki Gemini API kalitini kiriting...</div>
+      <div class="ai-box-actions">
+        <button class="btn btn-gold" id="btn-rektor-submit" onclick="generateRektorAnalysis()">🤖 AI Tahlil olish</button>
+        <button class="btn btn-ghost" onclick="showPage('yigilis')">📋 Yig'ilish o'tkazish</button>
+      </div>
+    </div>
+
+    <!-- Prorektorlar holati -->
+    <div class="section">
+      <div class="sec-head">
+        <h3>👥 Prorektorlar va AI Agentlar — Joriy Holat</h3>
+        <button class="btn btn-outline" style="font-size:12px;padding:6px 12px;" onclick="showPage('yigilis')">
+          Yig'ilish o'tkazish →
+        </button>
+      </div>
+      <div class="sec-body">
+        <div class="agents-grid">
+          <div class="agent-card" onclick="showPage('oquv')">
+            <div class="ac-head">
+              <div class="ac-icon" style="background:#EFF6FF;">📚</div>
+              <div>
+                <div class="ac-name">AI O'quv ishlari</div>
+              </div>
+              <span class="ni-badge badge-green ac-status">Faol</span>
+            </div>
+            <div class="ac-body">
+              <div class="ac-stat"><span class="ac-stat-label">Kvota to'lishi</span><span class="ac-stat-val" style="color:#059669;">94%</span></div>
+              <div class="ac-stat"><span class="ac-stat-label">Darslar davomati</span><span class="ac-stat-val">87%</span></div>
+              <div class="ac-stat"><span class="ac-stat-label">Muammoli fanlar</span><span class="ac-stat-val" style="color:#DC2626;">3 ta</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:94%;background:#059669;"></div></div>
+            </div>
+          </div>
+
+          <div class="agent-card" onclick="showPage('ilmiy')">
+            <div class="ac-head">
+              <div class="ac-icon" style="background:#F5F3FF;">🔬</div>
+              <div><div class="ac-name">AI Ilmiy ishlar</div></div>
+              <span class="ni-badge badge-green ac-status">Faol</span>
+            </div>
+            <div class="ac-body">
+              <div class="ac-stat"><span class="ac-stat-label">Scopus maqolalar</span><span class="ac-stat-val" style="color:#7C3AED;">147 ta</span></div>
+              <div class="ac-stat"><span class="ac-stat-label">Faol grantlar</span><span class="ac-stat-val">8 ta</span></div>
+              <div class="ac-stat"><span class="ac-stat-label">Konferensiyalar</span><span class="ac-stat-val">12 ta</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:78%;background:#7C3AED;"></div></div>
+            </div>
+          </div>
+
+          <div class="agent-card" onclick="showPage('yoshlar')">
+            <div class="ac-head">
+              <div class="ac-icon" style="background:#FFFBEB;">👥</div>
+              <div><div class="ac-name">AI Yoshlar masalalari</div></div>
+              <span class="ni-badge badge-orange ac-status">Diqqat</span>
+            </div>
+            <div class="ac-body">
+              <div class="ac-stat"><span class="ac-stat-label">Tadbirlar (oy)</span><span class="ac-stat-val">24 ta</span></div>
+              <div class="ac-stat"><span class="ac-stat-label">Ishtirokchilar</span><span class="ac-stat-val">1,240</span></div>
+              <div class="ac-stat"><span class="ac-stat-label">Psixolog talabalari</span><span class="ac-stat-val" style="color:#D97706;">45 ta</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:65%;background:#D97706;"></div></div>
+            </div>
+          </div>
+
+          <div class="agent-card" onclick="showPage('talaba')">
+            <div class="ac-head">
+              <div class="ac-icon" style="background:#FFF5F5;">🎓</div>
+              <div><div class="ac-name">AI Talabalar masalalari</div></div>
+              <span class="ni-badge badge-red ac-status">Xavf</span>
+            </div>
+            <div class="ac-body">
+              <div class="ac-stat"><span class="ac-stat-label">Xavf guruhidagi</span><span class="ac-stat-val" style="color:#DC2626;">312 ta</span></div>
+              <div class="ac-stat"><span class="ac-stat-label">Stipendiyasizlar</span><span class="ac-stat-val">89 ta</span></div>
+              <div class="ac-stat"><span class="ac-stat-label">Ochiq murojaatlar</span><span class="ac-stat-val">47 ta</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:45%;background:#DC2626;"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ogohlantirishlar -->
+    <div class="section">
+      <div class="sec-head"><h3>⚠️ Muhim Ogohlantirishlar</h3></div>
+      <div class="sec-body">
+        <div class="alert alert-danger" id="dangerAlert">⛔ <div><strong>312 talaba</strong> akademik xavf guruhida — darhol tyutor yo'naltirish tavsiya etiladi</div></div>
+        <div class="alert alert-warn">⚠️ <div><strong>Akkreditatsiya tekshiruvi</strong> 45 kun ichida — O'quv ishlari bo'limini tayyorlash kerak</div></div>
+        <div class="alert alert-info">ℹ️ <div><strong>3 ta fan</strong> bo'yicha davomad 70% dan past — jadval ko'rib chiqilsin</div></div>
+        <div class="alert alert-success" id="successAlert">✅ <div><strong>Ilmiy nashrlar</strong> rejalashtirilgan ko'rsatkichdan 15% yuqori — davom ettirilsin</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       HEMIS
+  ═══════════════════════════════════════ -->
+  <div class="page" id="page-hemis">
+    <div class="dash-header">
+      <div class="dash-title">
+        <h1>🗄️ HEMIS Integratsiya</h1>
+        <p>Talabalar axborot tizimi bilan real vaqt sinxronizatsiya</p>
+      </div>
+      <div class="dash-actions">
+        <button class="btn btn-outline" onclick="syncHemis()">🔄 HEMIS Sinxron</button>
+        <button class="btn btn-primary" onclick="analyzeHemis()">🤖 AI Tahlil</button>
+      </div>
+    </div>
+
+    <div class="alert alert-success" style="margin-bottom:20px;">
+      ✅ <div>HEMIS tizimi muvaffaqiyatli bog'langan — Oxirgi sinxronizatsiya: <strong>bugun 08:45</strong> • Keyingisi: 14:00</div>
+    </div>
+
+    <div class="hemis-grid" style="margin-bottom:20px;" id="hemisStats">
+      <div class="hemis-card">
+        <div class="hemis-label">Jami talabalar (HEMIS)</div>
+        <div class="hemis-num" id="hemis-total" style="color:#2563EB;">8,420</div>
+        <div class="hemis-trend" style="color:#059669;">↑ 420 nafar yangi</div>
+      </div>
+      <div class="hemis-card">
+        <div class="hemis-label">Davomad (o'rtacha)</div>
+        <div class="hemis-num" style="color:#059669;">87.3%</div>
+        <div class="hemis-trend" style="color:#059669;">↑ 2.1% oshgan</div>
+      </div>
+      <div class="hemis-card">
+        <div class="hemis-label">O'rtacha baho (GPA)</div>
+        <div class="hemis-num" id="hemis-gpa" style="color:#7C3AED;">3.41</div>
+        <div class="hemis-trend" style="color:#059669;">↑ 0.08 oshgan</div>
+      </div>
+      <div class="hemis-card">
+        <div class="hemis-label">Akademik qarz</div>
+        <div class="hemis-num" id="hemis-debts" style="color:#DC2626;">312</div>
+        <div class="hemis-trend" style="color:#DC2626;">↑ 28 nafar oshgan</div>
+      </div>
+      <div class="hemis-card">
+        <div class="hemis-label">Stipendiyachilar</div>
+        <div class="hemis-num" style="color:#059669;">4,210</div>
+        <div class="hemis-trend" style="color:#059669;">50% talabalar</div>
+      </div>
+      <div class="hemis-card">
+        <div class="hemis-label">Fakultetlar</div>
+        <div class="hemis-num" id="hemis-facs" style="color:#D97706;">8</div>
+        <div class="hemis-trend">58 yo'nalish</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-head"><h3>📊 Fakultetlar bo'yicha joriy ko'rsatkichlar</h3></div>
+      <div class="sec-body">
+        <div class="table-wrap">
+          <table id="facultiesTable">
+            <thead>
+              <tr>
+                <th>Fakultet nomi</th>
+                <th>Talabalar soni</th>
+                <th>O'rtacha GPA</th>
+                <th>Davomad</th>
+                <th>Xavf guruh</th>
+                <th>Holat</th>
+              </tr>
+            </thead>
+            <tbody id="facultiesTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="ai-box" id="hemisAiBox">
+      <div class="ai-box-header">
+        <div class="ai-box-icon">🗄️</div>
+        <div>
+          <div class="ai-box-title">AI — HEMIS Ma'lumotlar Tahlili</div>
+          <div class="ai-box-sub">HEMIS ma'lumotlari asosida tayyorlangan tezkor strategik hisobot</div>
+        </div>
+      </div>
+      <div class="ai-box-content" id="hemisAnalysis">⏳ "AI Tahlil" tugmasini bosib, HEMIS ma'lumotlari tahlilini oling...</div>
+      <div class="ai-box-actions">
+        <button class="btn btn-gold" id="btn-hemis-submit" onclick="analyzeHemis()">🤖 HEMIS tahlil</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       O'QUV ISHLARI
+  ═══════════════════════════════════════ -->
+  <div class="page" id="page-oquv">
+    <div class="dash-header">
+      <div class="dash-title">
+        <h1>📚 O'quv Ishlari Bo'limi</h1>
+        <p>Ta'lim sifati, kvota, dars jadvallari, akkreditatsiya nazorati</p>
+      </div>
+      <button class="btn btn-primary" onclick="analyzeBoylim('oquv')">🤖 AI Tahlil</button>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card" style="border-top:4px solid #2563EB;">
+        <div class="stat-label">Kvota to'lishi</div>
+        <div class="stat-num" style="color:#2563EB;">94%</div>
+        <div class="stat-change" style="color:#059669;">↑ Reja bo'yicha faol</div>
+      </div>
+      <div class="stat-card" style="border-top:4px solid #059669;">
+        <div class="stat-label">Fanlar soni</div>
+        <div class="stat-num" style="color:#059669;">284</div>
+        <div class="stat-change">58 yo'nalish</div>
+      </div>
+      <div class="stat-card" style="border-top:4px solid #DC2626;">
+        <div class="stat-label">Muammoli fanlar</div>
+        <div class="stat-num" style="color:#DC2626;">3</div>
+        <div class="stat-change" style="color:#DC2626;">↑ Davomad past</div>
+      </div>
+      <div class="stat-card" style="border-top:4px solid #D97706;">
+        <div class="stat-label">Akkreditatsiya</div>
+        <div class="stat-num" style="color:#D97706;">45</div>
+        <div class="stat-change" style="color:#D97706;">kun qoldi</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-head">
+        <h3>📋 O'quv jarayonlari tahlili uchun ma'lumot kiritish</h3>
+      </div>
+      <div class="sec-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Hisobot turi</label>
+            <select class="form-select" id="oquv-type">
+              <option value="Kvota va qabul holati">Kvota va qabul holati</option>
+              <option value="Dars jadvali muammolari">Dars jadvali muammolari</option>
+              <option value="Davomad holati">Davomad holati</option>
+              <option value="Akkreditatsiya tayyorgarligi">Akkreditatsiya tayyorgarligi</option>
+              <option value="Fan natijalari tahlili">Fan natijalari tahlili</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">O'quv yili va semestr</label>
+            <select class="form-select" id="oquv-semestr">
+              <option>2025-2026 o'quv yili, 2-semestr</option>
+              <option>2025-2026 o'quv yili, 1-semestr</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tahlil qilinadigan ma'lumot va vaziyat</label>
+          <textarea class="form-textarea" id="oquv-data" placeholder="Misol: Menejment fakultetida 3-kurs talabalari o'rtasida 'Strategik menejment' fanidan o'zlashtirish 58% ga tushib qolgan. Asosiy sabab: yangi o'qituvchi, dars jadvali noqulayligi..."></textarea>
+        </div>
+        <button class="btn btn-primary" id="btn-oquv-submit" onclick="submitBoylim('oquv')">🤖 AI Tahlil va Tavsiya olish</button>
+      </div>
+    </div>
+
+    <div class="ai-box" id="oquv-result" style="display:none;">
+      <div class="ai-box-header">
+        <div class="ai-box-icon">📚</div>
+        <div>
+          <div class="ai-box-title">AI O'quv Ishlari — Tahlil Natijasi</div>
+          <div class="ai-box-sub">O'quv ishlari prorektorining AI agenti tomonidan tayyorlangan tahlil</div>
+        </div>
+      </div>
+      <div class="ai-box-content" id="oquv-ai-text"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       ILMIY ISHLAR
+  ═══════════════════════════════════════ -->
+  <div class="page" id="page-ilmiy">
+    <div class="dash-header">
+      <div class="dash-title">
+        <h1>🔬 Ilmiy Ishlar Bo'limi</h1>
+        <p>Tadqiqot, ilmiy nashrlar, innovatsiya va grantlar nazorati</p>
+      </div>
+      <button class="btn btn-primary" onclick="analyzeBoylim('ilmiy')">🤖 AI Tahlil</button>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card" style="border-top:4px solid #7C3AED;">
+        <div class="stat-label">Scopus/WoS nashrlar</div>
+        <div class="stat-num" id="stat-scopus-ilmiy" style="color:#7C3AED;">147</div>
+        <div class="stat-change" style="color:#059669;">↑ Reja: 120 • Bajarildi: 122%</div>
+      </div>
+      <div class="stat-card" style="border-top:4px solid #059669;">
+        <div class="stat-label">Faol grantlar</div>
+        <div class="stat-num" style="color:#059669;">8</div>
+        <div class="stat-change">$240,000 jami hajm</div>
+      </div>
+      <div class="stat-card" style="border-top:4px solid #2563EB;">
+        <div class="stat-label">Xalqaro hamkorlik</div>
+        <div class="stat-num" style="color:#2563EB;">14</div>
+        <div class="stat-change">Xalqaro hamkor OTMlar</div>
+      </div>
+      <div class="stat-card" style="border-top:4px solid #D97706;">
+        <div class="stat-label">Patentlar</div>
+        <div class="stat-num" style="color:#D97706;">6</div>
+        <div class="stat-change" style="color:#059669;">↑ 2 ta yangi patent</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-head"><h3>📋 Ilmiy faoliyat va hisobot tahlili</h3></div>
+      <div class="sec-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Tahlil turi</label>
+            <select class="form-select" id="ilmiy-type">
+              <option value="Nashrlar holati">Nashrlar holati (Scopus/WoS)</option>
+              <option value="Grant jarayoni">Grant jarayoni va arizalar</option>
+              <option value="Xalqaro hamkorlik">Xalqaro hamkorlik va reytinglar</option>
+              <option value="Innovatsion loyihalar">Innovatsion loyihalar va startaplar</option>
+              <option value="Konferensiya natijalari">Konferensiya natijalari</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kafedra / Fakultet</label>
+            <select class="form-select" id="ilmiy-kafedra">
+              <option>Barcha kafedralar</option>
+              <option>Iqtisodiyot nazariyasi</option>
+              <option>Moliya va bank differsiyali</option>
+              <option>IT va raqamli texnologiyalar</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Vaziyat tafsilotlari</label>
+          <textarea class="form-textarea" id="ilmiy-data" placeholder="Misol: Bu semestrda 12 ta yangi maqola Scopus bazasiga yuborildi. 3 ta xalqaro grant uchun ariza topshirildi. QS reytingini oshirish bo'yicha takliflar kerak..."></textarea>
+        </div>
+        <button class="btn btn-primary" id="btn-ilmiy-submit" onclick="submitBoylim('ilmiy')">🤖 AI Tahlil va Tavsiya</button>
+      </div>
+    </div>
+
+    <div class="ai-box" id="ilmiy-result" style="display:none;">
+      <div class="ai-box-header">
+        <div class="ai-box-icon">🔬</div>
+        <div>
+          <div class="ai-box-title">AI Ilmiy Ishlar — Tahlil Natijasi</div>
+          <div class="ai-box-sub">Ilmiy ishlar va innovatsiyalar prorektorining AI agenti xulosasi</div>
+        </div>
+      </div>
+      <div class="ai-box-content" id="ilmiy-ai-text"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       YOSHLAR MASALALARI
+  ═══════════════════════════════════════ -->
+  <div class="page" id="page-yoshlar">
+    <div class="dash-header">
+      <div class="dash-title">
+        <h1>👥 Yoshlar Masalalari Bo'limi</h1>
+        <p>Ma'naviy-ma'rifiy ishlar, talabalar faolligi, to'garaklar va to'lovlar tahlili</p>
+      </div>
+      <button class="btn btn-primary" onclick="analyzeBoylim('yoshlar')">🤖 AI Tahlil</button>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card" style="border-top:4px solid #D97706;">
+        <div class="stat-label">Oylik tadbirlar rejasi</div>
+        <div class="stat-num" style="color:#D97706;">24</div>
+        <div class="stat-change">Bu oy bajarilgan tadbirlar</div>
+      </div>
+      <div class="stat-card" style="border-top:4px solid #059669;">
+        <div class="stat-label">Ijtimoiy faol yoshlar</div>
+        <div class="stat-num" style="color:#059669;">1,240</div>
+        <div class="stat-change" style="color:#059669;">↑ 14.7% talabalardan faol</div>
+      </div>
+      <div class="stat-card" style="border-top:4px solid #DC2626;">
+        <div class="stat-label">Psixologik yordam kerak</div>
+        <div class="stat-num" style="color:#DC2626;">45</div>
+        <div class="stat-change" style="color:#DC2626;">↑ Tyutorlar aniqlagan talaba</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-head"><h3>📋 Yoshlar masalalari va ma'naviy-ma'rifiy hisobot</h3></div>
+      <div class="sec-body">
+        <div class="form-group">
+          <label class="form-label">Hisobot turi</label>
+          <select class="form-select" id="yoshlar-type">
+            <option value="Tadbirlar hisoboti">Tadbirlar va Yoshlar ittifoqi faolligi</option>
+            <option value="Sport faoliyati">Sport musobaqalari va to'garaklar</option>
+            <option value="Psixologik holat">Ijtimoiy-psixologik monitoring</option>
+            <option value="Yoshlar tashkiloti">Talabalar kengashi va tashabbuslar</option>
+            <option value="Ma'naviy-ma'rifiy ishlar">Ma'naviy-ma'rifiy ishlar holati</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ma'lumot va vaziyat tasviri</label>
+          <textarea class="form-textarea" id="yoshlar-data" placeholder="Misol: Ushbu oyda 'Besh tashabbus' doirasida 3 ta sport musobaqasi o'tkazildi. Yoshlar o'rtasida ijtimoiy so'rovnomalar o'tkazildi, 45 nafar talabaga psixologik qo'llab-quvvatlash kerakligi aniqlandi..."></textarea>
+        </div>
+        <button class="btn btn-primary" id="btn-yoshlar-submit" onclick="submitBoylim('yoshlar')">🤖 AI Tahlil</button>
+      </div>
+    </div>
+
+    <div class="ai-box" id="yoshlar-result" style="display:none;">
+      <div class="ai-box-header">
+        <div class="ai-box-icon">👥</div>
+        <div>
+          <div class="ai-box-title">AI Yoshlar Masalalari — Tahlil Natijasi</div>
+          <div class="ai-box-sub">Yoshlar masalalari va ma'naviy-ma'rifiy prorektorining AI agenti xulosasi</div>
+        </div>
+      </div>
+      <div class="ai-box-content" id="yoshlar-ai-text"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       TALABALAR MASALALARI
+  ═══════════════════════════════════════ -->
+  <div class="page" id="page-talaba">
+    <div class="dash-header">
+      <div class="dash-title">
+        <h1>🎓 Talabalar Masalalari Bo'limi</h1>
+        <p>Talabalar o'zlashtirishi, stipendiyalar, yotoqxona va ijtimoiy masalalar</p>
+      </div>
+      <button class="btn btn-primary" onclick="analyzeBoylim('talaba')">🤖 AI Tahlil</button>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card" style="border-top:4px solid #DC2626;">
+        <div class="stat-label">Xavf guruhidagi talabalar</div>
+        <div class="stat-num" id="stat-risk-students-talaba" style="color:#DC2626;">312</div>
+        <div class="stat-change" style="color:#DC2626;">↑ Akademik chetlashtirish xavfi</div>
+      </div>
+      <div class="stat-card" style="border-top:4px solid #D97706;">
+        <div class="stat-label">Talabalar murojaatlari</div>
+        <div class="stat-num" style="color:#D97706;">47</div>
+        <div class="stat-change">Ko'rib chiqilayotgan murojaatlar</div>
+      </div>
+      <div class="stat-card" style="border-top:4px solid #059669;">
+        <div class="stat-label">Stipendiyachilar</div>
+        <div class="stat-num" style="color:#059669;">4,210</div>
+        <div class="stat-change" style="color:#059669;">Talabalarning 50% qismi</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-head"><h3>📋 Talabalar holati va muammolari tahlili</h3></div>
+      <div class="sec-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Hisobot turi</label>
+            <select class="form-select" id="talaba-type">
+              <option value="Akademik xavf guruhidagi talabalar">Akademik xavf guruhidagi talabalar</option>
+              <option value="Murojaat va shikoyatlar">Murojaat va shikoyatlar</option>
+              <option value="Stipendiya masalalari">Stipendiya masalalari</option>
+              <option value="Yotoqxona holati">Yotoqxona va yashash sharoiti</option>
+              <option value="Ijtimoiy yordam zarur talabalar">Ijtimoiy yordam zarur talabalar</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fakultet</label>
+            <select class="form-select" id="talaba-fakultet">
+              <option>Barcha fakultetlar</option>
+              <option>Menejment (89 nafar xavfda)</option>
+              <option>Buxgalteriya (67 nafar xavfda)</option>
+              <option>Marketing (51 nafar xavfda)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Qo'shimcha ma'lumot va tushuntirish</label>
+          <textarea class="form-textarea" id="talaba-data" placeholder="Misol: Menejment fakultetida 89 nafar talaba 3 tadan ko'p fandan akademik qarzdor bo'lib qoldi. Ularni tyutor orqali nazorat qilish rejasi..."></textarea>
+        </div>
+        <button class="btn btn-primary" id="btn-talaba-submit" onclick="submitBoylim('talaba')">🤖 AI Tahlil</button>
+      </div>
+    </div>
+
+    <div class="ai-box" id="talaba-result" style="display:none;">
+      <div class="ai-box-header">
+        <div class="ai-box-icon">🎓</div>
+        <div>
+          <div class="ai-box-title">AI Talabalar Masalalari — Tahlil Natijasi</div>
+          <div class="ai-box-sub">Talabalar masalalari prorektorining AI agenti xulosasi</div>
+        </div>
+      </div>
+      <div class="ai-box-content" id="talaba-ai-text"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       TYUTOR HISOBOTLAR
+  ═══════════════════════════════════════ -->
+  <div class="page" id="page-tyutor">
+    <div class="dash-header">
+      <div class="dash-title">
+        <h1>👨‍½ Tyutor Hisobotlari</h1>
+        <p>Tyutorlar bu yerga kundalik guruh tahlilini kiritadilar → Rektoratga hisobot yuboriladi</p>
+      </div>
+    </div>
+
+    <div class="alert alert-info" style="margin-bottom:20px;">
+      ℹ️ <div>Tyutor kiritgan ma'lumotlar AI yordamida avtomatik qayta ishlanadi. Xavf guruhidagi talabalar aniqlansa, Rektor dashboardida statistika darhol yangilanadi.</div>
+    </div>
+
+    <div class="section">
+      <div class="sec-head"><h3>📤 Guruh hisobotini topshirish</h3></div>
+      <div class="sec-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Tyutor F.I.O</label>
+            <input class="form-input" id="tyutor-name" value="Abdullayev Jasur Hamidovich" placeholder="Abdullayev Jasur Hamidovich" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Guruh nomi</label>
+            <input class="form-input" id="tyutor-group" value="IQ-21-01" placeholder="IQ-21-01, MN-22-02" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Guruh umumiy holati (Davomad va GPA)</label>
+          <textarea class="form-textarea" id="tyutor-general" placeholder="Guruh IQ-21-01: 28 nafar talaba. O'rtacha o'zlashtirish 78%. Davomad 89%. Darslarda qatnashish faolligi yaxshi."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">⚠️ Guruhdagi muammoli talabalar (F.I.O, sabab, akademik qarz)</label>
+          <textarea class="form-textarea" id="tyutor-problems" placeholder="1. Karimov Sardor — 4 ta fandan akademik qarzdorligi bor, sabab oilaviy muammolari&#10;2. Umarova Zulfiya — Davomad pastligi (50%), surunkali kasallik tufayli dars qoldirmoqda&#10;3. Toshmatov Javlon — To'lov shartnomasini to'lashda qiyinchilik..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">💡 Muammolarni hal qilish bo'yicha takliflar va so'rovlar</label>
+          <textarea class="form-textarea" id="tyutor-suggestions" placeholder="Dars jadvalini optimallashtirish, Karimov Sardorga fanlar bo'yicha qo'shimcha konsultatsiyalar ajratish va oilaviy moddiy yordam ko'rib chiqish so'raladi."></textarea>
+        </div>
+        <button class="btn btn-primary" id="btn-tyutor-submit" onclick="submitTyutor()">📤 Hisobotni yuborish va AI Tahlilini olish</button>
+      </div>
+    </div>
+
+    <div class="ai-box" id="tyutor-result" style="display:none;">
+      <div class="ai-box-header">
+        <div class="ai-box-icon">👨‍🏫</div>
+        <div>
+          <div class="ai-box-title">AI — Tyutor Hisoboti Tahlili</div>
+          <div class="ai-box-sub">Avtomatik qayta ishlandi va Rektor boshqaruv markaziga saqlandi</div>
+        </div>
+      </div>
+      <div class="ai-box-content" id="tyutor-ai-text"></div>
+      <div class="ai-box-actions">
+        <button class="btn btn-gold" onclick="showPage('dashboard')">🏛️ Rektorda ko'rish</button>
+      </div>
+    </div>
+
+    <!-- Yuborilgan hisobotlar -->
+    <div class="section">
+      <div class="sec-head"><h3>📋 So'nggi topshirilgan hisobotlar</h3></div>
+      <div class="sec-body">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Tyutor F.I.O</th><th>Guruh</th><th>Sana</th><th>Muammolar soni</th><th>AI status</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Abdullayev J.</td><td>IQ-21-01</td><td>Bugun 15:20</td><td style="color:#DC2626;">3 ta muammo</td><td><span class="chip badge-green">✅ Tahlil qilindi</span></td></tr>
+              <tr><td>Xoliqova M.</td><td>MN-22-02</td><td>Kecha 14:06</td><td style="color:#D97706;">5 ta muammo</td><td><span class="chip badge-green">✅ Tahlil qilindi</span></td></tr>
+              <tr><td>Rahimov B.</td><td>BX-21-03</td><td>13.06.2026</td><td style="color:#DC2626;">7 ta muammo</td><td><span class="chip badge-green">✅ Tahlil qilindi</span></td></tr>
+              <tr><td>Nazarova D.</td><td>MK-23-01</td><td>12.06.2026</td><td style="color:#059669;">1 ta muammo</td><td><span class="chip badge-green">✅ Tahlil qilindi</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       AI YIG'ILISH (PARALLEL MEETING)
+  ═══════════════════════════════════════ -->
+  <div class="page" id="page-yigilis">
+    <div class="dash-header">
+      <div class="dash-title">
+        <h1>🤖 AI Yig'ilish — Parallel Muhokama Markazi</h1>
+        <p>Barcha 4 prorektor parallel tahlil olib boradi → Rektor yakuniy qaror chiqaradi</p>
+      </div>
+    </div>
+
+    <div class="alert alert-info" style="margin-bottom:20px;">
+      ℹ️ <div>Ushbu bo'limda muhokama qilmoqchi bo'lgan masalani yozing. 4 ta AI agenti o'z yo'nalishi bo'yicha tahlil beradi va Rektor agenti YAGUNIY STRATEGIK YECHIMNI taqdim qiladi.</div>
+    </div>
+
+    <div class="section" style="margin-bottom:24px;">
+      <div class="sec-head"><h3>📌 Muhokama uchun masala kiritish</h3></div>
+      <div class="sec-body">
+        <div class="form-group">
+          <label class="form-label">Yig'ilish mavzusi</label>
+          <textarea class="form-textarea" id="yigilis-savol" placeholder="Masalan: 312 nafar akademik qarzdor talabalarni darsga jalb qilish va o'zlashtirish darajasini oshirish uchun qanday kompleks choralar ko'rish kerak?"></textarea>
+        </div>
+        <button class="btn btn-primary" id="yigilisBtn" onclick="startYigilis()" style="width:100%;justify-content:center;padding:14px;font-size:14px;">
+          🚀 Yig'ilishni boshlash — 5 Agent Parallel Tahlili
+        </button>
+      </div>
+    </div>
+
+    <!-- Interactive simulation area -->
+    <div class="yigilis-container" id="yigilis-results" style="display:none;">
+      
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" id="agent-meeting-grid">
+        
+        <!-- O'QUV AGENT CARD -->
+        <div class="agent-chat-card" id="chatcard-oquv">
+          <div class="acc-header">
+            <div class="acc-icon" style="background:#EFF6FF;">📚</div>
+            <div class="acc-title">AI O'quv Ishlari Prorektori</div>
+            <span class="ni-badge badge-blue acc-status-lbl" id="status-lbl-oquv">Kutilmoqda</span>
+          </div>
+          <div class="acc-body" id="chatbody-oquv">Navbat kutilmoqda...</div>
+        </div>
+
+        <!-- YOSHLAR AGENT CARD -->
+        <div class="agent-chat-card" id="chatcard-yoshlar">
+          <div class="acc-header">
+            <div class="acc-icon" style="background:#FFFBEB;">👥</div>
+            <div class="acc-title">AI Yoshlar Masalalari Prorektori</div>
+            <span class="ni-badge badge-orange acc-status-lbl" id="status-lbl-yoshlar">Kutilmoqda</span>
+          </div>
+          <div class="acc-body" id="chatbody-yoshlar">Navbat kutilmoqda...</div>
+        </div>
+
+        <!-- ILMIY AGENT CARD -->
+        <div class="agent-chat-card" id="chatcard-ilmiy">
+          <div class="acc-header">
+            <div class="acc-icon" style="background:#F5F3FF;">🔬</div>
+            <div class="acc-title">AI Ilmiy Ishlar Prorektori</div>
+            <span class="ni-badge badge-purple acc-status-lbl" id="status-lbl-ilmiy">Kutilmoqda</span>
+          </div>
+          <div class="acc-body" id="chatbody-ilmiy">Navbat kutilmoqda...</div>
+        </div>
+
+        <!-- TALABA AGENT CARD -->
+        <div class="agent-chat-card" id="chatcard-talaba">
+          <div class="acc-header">
+            <div class="acc-icon" style="background:#FFF5F5;">🎓</div>
+            <div class="acc-title">AI Talabalar Masalalari Prorektori</div>
+            <span class="ni-badge badge-red acc-status-lbl" id="status-lbl-talaba">Kutilmoqda</span>
+          </div>
+          <div class="acc-body" id="chatbody-talaba">Navbat kutilmoqda...</div>
+        </div>
+
+      </div>
+
+      <!-- REKTOR YAKUNIY CARD -->
+      <div class="agent-chat-card" id="chatcard-rektor" style="grid-column: 1 / -1; background: var(--navy); border-color: var(--gold);">
+        <div class="acc-header" style="background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1);">
+          <div class="acc-icon" style="background:var(--gold); color:var(--navy);">🏛️</div>
+          <div class="acc-title" style="color:#fff;">AI Rektor — Yakuniy Strategik Qaror va Xulosa</div>
+          <span class="ni-badge badge-red acc-status-lbl" id="status-lbl-rektor" style="color:var(--navy); background:var(--gold);">Kutilmoqda</span>
+        </div>
+        <div class="acc-body" id="chatbody-rektor" style="color: rgba(255,255,255,0.9); font-size:13.5px; line-height:1.75;">Barcha prorektorlar hisoboti tayyor bo'lgandan so'ng umumiy yakuniy xulosa va TOP-3 strategik tavsiya beriladi.</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- Notify banner -->
+<div id="notify">Habar yuborildi</div>
+
+<!-- JAVASCRIPT LOGIC -->
+<script>
+// Universitetlar ma'lumotlar bazasi (OTMlar uchun integratsiya ko'rinishi)
+const UNIVERSITIES = {
+  TDIU: {
+    name: "Tashkent State University of Economics",
+    short: "TDIU",
+    students: "8,420",
+    gpa: "3.41",
+    scopus: "147",
+    tutors: "94%",
+    risk: "312",
+    dangerText: "312 nafar talaba akademik xavf guruhida — darhol tyutor yo'naltirish tavsiya etiladi",
+    successText: "Ilmiy nashrlar rejalashtirilgan ko'rsatkichdan 15% yuqori — davom ettirilsin",
+    faculties: [
+      { name: "Iqtisodiyot", students: "1,840", gpa: "3.62", attendance: "91%", risk: "28", status: "Yaxshi", class: "badge-green" },
+      { name: "Moliya", students: "1,620", gpa: "3.48", attendance: "89%", risk: "45", status: "Yaxshi", class: "badge-green" },
+      { name: "Buxgalteriya hisobi", students: "1,380", gpa: "3.31", attendance: "85%", risk: "67", status: "O'rtacha", class: "badge-orange" },
+      { name: "Menejment", students: "980", gpa: "3.12", attendance: "81%", risk: "89", status: "Diqqat", class: "badge-red" },
+      { name: "Marketing", students: "820", gpa: "3.28", attendance: "83%", risk: "51", status: "O'rtacha", class: "badge-orange" },
+      { name: "IT va raqamli iqtisodiyot", students: "680", gpa: "3.71", attendance: "93%", risk: "18", status: "A'lo", class: "badge-green" },
+      { name: "Andijon filiali", students: "720", gpa: "3.38", attendance: "86%", risk: "14", status: "Yaxshi", class: "badge-green" }
+    ]
+  },
+  TUIT: {
+    name: "Tashkent University of Information Technologies",
+    short: "TUIT",
+    students: "11,250",
+    gpa: "3.28",
+    scopus: "214",
+    tutors: "97%",
+    risk: "428",
+    dangerText: "428 nafar talaba dars qoldirganligi sababli xavf guruhida — HEMIS monitoringi faollashtirilsin",
+    successText: "2 ta IT startap loyiha xalqaro patent oldi — startap inkubatorini kengaytiring",
+    faculties: [
+      { name: "Dasturiy muhandislik", students: "2,450", gpa: "3.55", attendance: "92%", risk: "48", status: "A'lo", class: "badge-green" },
+      { name: "Kiberhavfsizlik", students: "1,820", gpa: "3.42", attendance: "88%", risk: "74", status: "Yaxshi", class: "badge-green" },
+      { name: "Telekommunikatsiya", students: "2,100", gpa: "3.11", attendance: "80%", risk: "124", status: "Diqqat", class: "badge-red" },
+      { name: "AT-Servis", students: "1,540", gpa: "3.25", attendance: "84%", risk: "88", status: "O'rtacha", class: "badge-orange" },
+      { name: "Kompyuter muhandisligi", students: "2,260", gpa: "3.34", attendance: "86%", risk: "62", status: "Yaxshi", class: "badge-green" },
+      { name: "Radioaloqa va televideniya", students: "1,080", gpa: "3.08", attendance: "79%", risk: "112", status: "Diqqat", class: "badge-red" }
+    ]
+  },
+  TTA: {
+    name: "Tashkent Medical Academy",
+    short: "TTA",
+    students: "6,890",
+    gpa: "3.68",
+    scopus: "98",
+    tutors: "91%",
+    risk: "189",
+    dangerText: "189 talaba amaliy klinika darslarida qatnashmagan — akademik qarzdorlik muddatini belgilang",
+    successText: "Scopus klinika tadqiqotlari soni 30% ga oshdi — Tibbiyot jurnali reytingi o'sdi",
+    faculties: [
+      { name: "Davolash ishi", students: "2,840", gpa: "3.75", attendance: "94%", risk: "34", status: "A'lo", class: "badge-green" },
+      { name: "Pediatriya ishi", students: "1,520", gpa: "3.64", attendance: "91%", risk: "42", status: "Yaxshi", class: "badge-green" },
+      { name: "Profilaktik tibbiyot", students: "980", gpa: "3.51", attendance: "87%", risk: "51", status: "Yaxshi", class: "badge-green" },
+      { name: "Stomatologiya", students: "850", gpa: "3.81", attendance: "95%", risk: "12", status: "A'lo", class: "badge-green" },
+      { name: "Oliy hamshiralik ishi", students: "700", gpa: "3.48", attendance: "89%", risk: "50", status: "O'rtacha", class: "badge-orange" }
+    ]
+  },
+  NUUz: {
+    name: "National University of Uzbekistan",
+    short: "NUUz",
+    students: "15,840",
+    gpa: "3.38",
+    scopus: "389",
+    tutors: "90%",
+    risk: "712",
+    dangerText: "712 talabada fanlar bo'yicha qarzdorlik bor — tyutorlik rejalari favqulodda ko'rib chiqilsin",
+    successText: "Fizika-matematika yo'nalishidagi Scopus nashrlar mamlakatda 1-o'rinda — qo'shimcha bonuslar ajratilsin",
+    faculties: [
+      { name: "Fizika fakulteti", students: "2,100", gpa: "3.45", attendance: "89%", risk: "84", status: "Yaxshi", class: "badge-green" },
+      { name: "Matematika fakulteti", students: "1,980", gpa: "3.52", attendance: "91%", risk: "62", status: "A'lo", class: "badge-green" },
+      { name: "Kimyo fakulteti", students: "1,850", gpa: "3.31", attendance: "84%", risk: "95", status: "O'rtacha", class: "badge-orange" },
+      { name: "Biologiya fakulteti", students: "1,620", gpa: "3.28", attendance: "83%", risk: "112", status: "Diqqat", class: "badge-red" },
+      { name: "Tarix fakulteti", students: "2,450", gpa: "3.18", attendance: "81%", risk: "189", status: "Diqqat", class: "badge-red" },
+      { name: "Xorijiy filologiya", students: "3,120", gpa: "3.48", attendance: "88%", risk: "98", status: "Yaxshi", class: "badge-green" },
+      { name: "Geografiya va tabiiy resurslar", students: "2,720", gpa: "3.21", attendance: "82%", risk: "172", status: "O'rtacha", class: "badge-orange" }
+    ]
+  }
+};
+
+// Joriy faol OTM
+let currentUniv = "TDIU";
+
+// Sahifalar orasida o'tish
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  
+  const targetPage = document.getElementById('page-' + pageId);
+  const targetBtn = document.getElementById('btn-' + pageId);
+  
+  if (targetPage) targetPage.classList.add('active');
+  if (targetBtn) targetBtn.classList.add('active');
+}
+
+// OTMni almashtirish funksiyasi (Dinamik Web MVP)
+function changeUniversity() {
+  const select = document.getElementById('univSelect');
+  currentUniv = select.value;
+  
+  // Sarlavha va metrikalarni yangilash
+  document.getElementById('headerUnivName').textContent = '— ' + currentUniv;
+  document.getElementById('dashMainTitle').textContent = UNIVERSITIES[currentUniv].name + ' Boshqaruv Markazi';
+  document.getElementById('rektorAiTitle').textContent = 'AI Rektor — ' + currentUniv + ' Strategik Tahlili';
+  
+  // Dashboard ko'rsatkichlari
+  document.getElementById('stat-total-students').textContent = UNIVERSITIES[currentUniv].students;
+  document.getElementById('stat-average-gpa').textContent = UNIVERSITIES[currentUniv].gpa;
+  document.getElementById('stat-scientific-pubs').textContent = UNIVERSITIES[currentUniv].scopus;
+  document.getElementById('stat-tutor-reports').textContent = UNIVERSITIES[currentUniv].tutors;
+  document.getElementById('stat-risk-students').textContent = UNIVERSITIES[currentUniv].risk;
+  document.getElementById('stat-risk-students-talaba').textContent = UNIVERSITIES[currentUniv].risk;
+  document.getElementById('stat-scopus-ilmiy').textContent = UNIVERSITIES[currentUniv].scopus;
+  
+  // Ogohlantirishlar matni
+  document.querySelector('#dangerAlert div').innerHTML = `⛔ <strong>${UNIVERSITIES[currentUniv].risk} nafar talaba</strong> ` + UNIVERSITIES[currentUniv].dangerText.split(' nafar talaba ')[1];
+  document.querySelector('#successAlert div').innerHTML = `✅ ` + UNIVERSITIES[currentUniv].successText;
+
+  // HEMIS ko'rsatkichlari
+  document.getElementById('hemis-total').textContent = UNIVERSITIES[currentUniv].students;
+  document.getElementById('hemis-gpa').textContent = UNIVERSITIES[currentUniv].gpa;
+  document.getElementById('hemis-debts').textContent = UNIVERSITIES[currentUniv].risk;
+  document.getElementById('hemis-facs').textContent = UNIVERSITIES[currentUniv].faculties.length;
+  
+  // Fakultetlar jadvalini to'ldirish
+  populateFacultiesTable();
+  
+  // AI maydonlarini tozalash
+  document.getElementById('rektorAnalysis').innerHTML = `⏳ OTM almashtirildi. Yangi tahlil olish tugmasini bosing...`;
+  document.getElementById('hemisAnalysis').innerHTML = `⏳ OTM almashtirildi. AI Tahlil tugmasini bosing...`;
+  
+  showNotify(currentUniv + " ma'lumotlari yuklandi!");
+}
+
+// Fakultetlar jadvalini yaratish
+function populateFacultiesTable() {
+  const tbody = document.getElementById('facultiesTableBody');
+  tbody.innerHTML = '';
+  
+  UNIVERSITIES[currentUniv].faculties.forEach(f => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><strong>${f.name}</strong></td>
+      <td>${f.students}</td>
+      <td style="color:var(--green); font-weight:600;">${f.gpa}</td>
+      <td>${f.attendance}</td>
+      <td style="color:var(--red); font-weight:600;">${f.risk}</td>
+      <td><span class="chip ${f.class}">${f.status}</span></td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+// Bildirishnoma ko'rsatish
+function showNotify(text) {
+  const notify = document.getElementById('notify');
+  notify.textContent = text;
+  notify.style.display = 'block';
+  setTimeout(() => { notify.style.display = 'none'; }, 3000);
+}
+
+// Dashboardni yangilash simulyatsiyasi
+function refreshDashboard() {
+  showNotify("Ma'lumotlar HEMIS bilan qayta sinxronizatsiya qilindi!");
+  changeUniversity();
+}
+
+// Gemini API so'rovlarni boshqarish
+async function queryGemini(promptText, systemPrompt = "", customKey = "") {
+  const apiKey = customKey || document.getElementById('apiKey').value.trim();
+  
+  // Agar API key kiritilgan bo'lsa to'g'ridan-to'g'ri Gemini API chaqiradi
+  if (apiKey) {
+    const model = "gemini-2.0-flash";
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    const fullPrompt = systemPrompt ? `${systemPrompt}\n\nSavol/Masala:\n${promptText}` : promptText;
+    
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: fullPrompt }] }],
+          generationConfig: { temperature: 0.7, maxOutputTokens: 2000 }
+        })
+      });
+      if (!res.ok) throw new Error(`Gemini API Xatosi: ${res.status}`);
+      const data = await res.json();
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || "Javob olib bo'lmadi.";
+    } catch (e) {
+      console.error(e);
+      return `[Gemini API API Xatosi]: ${e.message}\n(Taqdimot uchun avtomatik mock javob ishlatilishi mumkin)`;
+    }
+  }
+
+  // Agar mahalliy server.py ishlayotgan bo'lsa va API key bo'lmasa, local APIga yuboradi
+  try {
+    const res = await fetch("http://127.0.0.1:8000/savol", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        savol: promptText,
+        hujjat_matni: systemPrompt,
+        pro_rejim: false
+      })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data.yakuniy_xulosa || data.javob || JSON.stringify(data);
+    }
+  } catch (e) {
+    // Local API ham ishlamayotgan bo'lsa, offlayn rejimda mock javob qaytaradi (Taqdimot uchun 100% xavfsiz)
+    console.log("Mahalliy server ulanmadi, offlayn mock javob tayyorlanmoqda.");
+  }
+  
+  return null;
+}
+
+// 🏛️ Rektor uchun AI tahlil yaratish
+async function generateRektorAnalysis() {
+  const contentDiv = document.getElementById('rektorAnalysis');
+  const btn = document.getElementById('btn-rektor-submit');
+  
+  contentDiv.innerHTML = `<div class="loading"><div class="spinner"></div><span>AI Rektor barcha ma'lumotlarni integratsiya qilmoqda...</span></div>`;
+  btn.disabled = true;
+
+  const prompt = `Universitet: ${UNIVERSITIES[currentUniv].name} (${currentUniv}).
+Ko'rsatkichlar:
+- Talabalar: ${UNIVERSITIES[currentUniv].students}
+- O'rtacha GPA: ${UNIVERSITIES[currentUniv].gpa}
+- Scopus maqolalari: ${UNIVERSITIES[currentUniv].scopus}
+- Xavf ostidagi talabalar: ${UNIVERSITIES[currentUniv].risk}
+- Tyutor faolligi: ${UNIVERSITIES[currentUniv].tutors}
+
+Ushbu ko'rsatkichlar va muammolarni hisobga olgan holda Rektor uchun kunlik 1 sahifalik tahlil, eng asosiy 3 ta xavf nuqtasi va hal qilish bo'yicha tezkor topshiriqlarni O'zbek tilida yozing.`;
+
+  const sysPrompt = "Sen oliy ta'lim tizimida 20 yillik tajribaga ega Rektorning AI maslahatchisisan. Aniq, ilmiy, amaliy va buyruq xarakteridagi O'zbek tilidagi tavsiyalar ber.";
+
+  let result = await queryGemini(prompt, sysPrompt);
+  
+  // Agar API dan javob kelmasa (offline mock)
+  if (!result) {
+    result = `[AI REKTOR STRATEGIK XULOSASI — ${currentUniv}]
+
+Bugungi kunda universitetimizda umumiy holat barqaror, ammo bir nechta strategik yo'nalishlarga jiddiy e'tibor qaratishimiz lozim:
+
+1. ⚠️ AKADEMIK XAVF GURUHI:
+Hozirda ${UNIVERSITIES[currentUniv].risk} nafar talabamiz (HEMIS ma'lumotlariga ko'ra) chetlashtirish xavf ostida turibdi. Eng yuqori ko'rsatkich Menejment va Buxgalteriya yo'nalishlarida kuzatilmoqda. 
+*Qaror:* Tyutorlar jasur loyihasi orqali har bir talabaning shaxsiy ish stoli nazoratga olinsin va haftalik qo'shimcha konsultatsiyalar joriy etilsin.
+
+2. 📚 AKKREDITATSIYA TAYYORGARLIGI:
+Tashqi sifat tekshiruviga roppa-rosa 45 kun qoldi. O'quv ishlari bo'limi jadvallar va sillabuslar integratsiyasini tezlashtirishi zarur.
+
+3. 🔬 ILMIY NASHRLAR VA REYTING:
+${currentUniv} ilmiy salohiyati joriy yilda ijobiy o'sish ko'rsatmoqda (+15%). Scopus nashrlar sonini yanada ko'paytirish uchun yosh olimlarga rag'batlantirish tizimini kengaytirish taklif etiladi.`;
+  }
+
+  contentDiv.innerHTML = result.replace(/\n/g, '<br>');
+  btn.disabled = false;
+  showNotify("AI Rektor strategik tahlili tayyorlandi!");
+}
+
+// 🗄️ HEMIS ma'lumotlarini tahlil qilish
+async function analyzeHemis() {
+  const contentDiv = document.getElementById('hemisAnalysis');
+  const btn = document.getElementById('btn-hemis-submit');
+  
+  contentDiv.innerHTML = `<div class="loading"><div class="spinner"></div><span>HEMIS katta ma'lumotlar ombori tahlil qilinmoqda...</span></div>`;
+  btn.disabled = true;
+
+  const prompt = `Universitetimiz: ${UNIVERSITIES[currentUniv].name}.
+Fakultetlar bo'yicha HEMIS ko'rsatkichlari:
+${JSON.stringify(UNIVERSITIES[currentUniv].faculties)}
+
+Fakultetlarning o'zlashtirish va davomad ma'lumotlarini o'zaro solishtirib, qaysi yo'nalish eng orqada qolayotgani va uning sabablari hamda hal qilish yo'llarini aniqlab, O'zbek tilida tahlil bering.`;
+
+  let result = await queryGemini(prompt, "Sen HEMIS integratsiyasi va EdTech data tahlilchisisan. Ma'lumotlardagi korrelyatsiyani top (masalan, davomad pastligi va GPA pastligi o'rtasidagi bog'liqlik).");
+
+  if (!result) {
+    result = `[HEMIS BIG DATA TAHLILI — ${currentUniv}]
+
+Ma'lumotlar tahlili shuni ko'rsatdiki, universitetda talabalarning darsga qatnashishi (davomad) va ularning o'rtacha GPA ko'rsatkichlari o'rtasida 87% lik to'g'ridan-to'g'ri korrelyatsiya mavjud:
+
+1. 🚨 MENEJMENT VA BUXGALTERIYA FAKULTETI:
+Eng past davomad ko'rsatkichi (81% va 85%) va eng past o'rtacha GPA (3.12 va 3.31) aynan ushbu fakultetlarda. Davomadning 10% ga pasayishi GPA ning 0.3 ballga pasayishiga olib kelmoqda. Xavf guruhidagi talabalarning 50% dan ortig'i ushbu ikki sohaga to'g'ri keladi.
+
+2. 📈 IT VA RAQAMLI IQTISODIYOT FAKULTETI:
+Eng yuqori ko'rsatkichlar (GPA 3.71, Davomad 93%) kiberhavfsizlik va dasturiy muhandislik sohalarida. Bu yerdagi raqamli resurslardan foydalanish darajasi yuqoriligi sababli akademik qarzdorlik juda past (faqatgina 18 nafar talaba).
+
+TAVSIYALAR:
+- Menejment fakultetida davomad nazoratini HEMIS tizimi orqali avtomatlashtirish va ota-onalar bilan SMS-ogohlantirish tizimini yo'lga qo'yish.
+- Akademik qarzdorlar uchun oraliq nazoratlarni topshirish uchun platformada raqamli repetitor (AI Tutor) modulini faollashtirish.`;
+  }
+
+  contentDiv.innerHTML = result.replace(/\n/g, '<br>');
+  btn.disabled = false;
+  showNotify("HEMIS ma'lumotlari tahlili yakunlandi!");
+}
+
+// Prorektor bo'limlari hisobotini topshirish
+async function submitBoylim(dept) {
+  const resultDiv = document.getElementById(dept + '-result');
+  const textDiv = document.getElementById(dept + '-ai-text');
+  const textInput = document.getElementById(dept + '-data');
+  const btn = document.getElementById('btn-' + dept + '-submit');
+  
+  if (!textInput.value.trim()) {
+    alert("Iltimos, vaziyat haqida ma'lumot yozing!");
+    return;
+  }
+
+  resultDiv.style.display = 'block';
+  textDiv.innerHTML = `<div class="loading"><div class="spinner"></div><span>AI Prorektor tahlil qilmoqda...</span></div>`;
+  btn.disabled = true;
+
+  const deptsUz = { oquv: "O'quv ishlari", ilmiy: "Ilmiy ishlar va innovatsiya", yoshlar: "Yoshlar masalalari va ma'naviyat", talaba: "Talabalar masalalari" };
+  const promptText = `OTM: ${UNIVERSITIES[currentUniv].name}. Bo'lim: ${deptsUz[dept]} prorektori sifatida quyidagi ma'lumotni o'rganib chiqib, yechim taklif qiling:
+  "${textInput.value.trim()}"`;
+
+  let result = await queryGemini(promptText, `Sen ${deptsUz[dept]} bo'yicha mas'ul AI Prorektorsan. Faqat o'z yo'nalishing doirasida professional yechimlar ber.`);
+
+  if (!result) {
+    result = `[${deptsUz[dept].toUpperCase()} PROREKTORI QARORI — ${currentUniv}]
+
+Kiritilgan ma'lumotlar o'rganib chiqildi. Joriy vaziyat bo'yicha quyidagi chora-tadbirlar belgilandi:
+
+1. Muammoning asosiy sababi: tizimli monitoring yetishmasligi va resurslarning noto'g'ri taqsimlanishi.
+2. Tezkor yechimlar:
+   - Yo'nalish bo'yicha ishchi guruh tuzish va 3 kun muddatda vaziyatni bevosita o'rganish.
+   - Muammo yuzaga kelgan fakultet dekaniga yozma ko'rsatma yuborish.
+3. Kutilayotgan natija: 15 kun ichida ko'rsatkichlarning 20% ga yaxshilanishi kutilmoqda.
+
+Topshiriq ijrosi nazoratga olindi.`;
+  }
+
+  textDiv.innerHTML = result.replace(/\n/g, '<br>');
+  btn.disabled = false;
+  showNotify("Tahlil tayyor!");
+}
+
+// Bo'lim tugmalari uchun soddalashtirilgan tahlil chaqiruvchisi
+function analyzeBoylim(dept) {
+  const deptsUz = {
+    oquv: "Menejment fakultetida akkreditatsiyaga tayyorgarlik sust, sillabuslar yuklanishi kechikmoqda.",
+    ilmiy: "Kafedralarda Scopus jurnallarida maqola chiqarish rejasini 100% ga bajarish yo'llari.",
+    yoshlar: "Talabalar turar joylarida ma'naviy muhitni yaxshilash va to'garaklarni rivojlantirish.",
+    talaba: "Akademik xavfdagi 312 talabani qayta topshirish muddatlarini tashkil etish muammosi."
+  };
+  document.getElementById(dept + '-data').value = deptsUz[dept];
+  submitBoylim(dept);
+}
+
+// 👨‍🏫 Tyutor hisobotini topshirish
+async function submitTyutor() {
+  const resultDiv = document.getElementById('tyutor-result');
+  const textDiv = document.getElementById('tyutor-ai-text');
+  const btn = document.getElementById('btn-tyutor-submit');
+  
+  const name = document.getElementById('tyutor-name').value;
+  const group = document.getElementById('tyutor-group').value;
+  const general = document.getElementById('tyutor-general').value;
+  const problems = document.getElementById('tyutor-problems').value;
+  const suggestions = document.getElementById('tyutor-suggestions').value;
+
+  resultDiv.style.display = 'block';
+  textDiv.innerHTML = `<div class="loading"><div class="spinner"></div><span>AI Tyutor hisoboti qayta ishlanmoqda...</span></div>`;
+  btn.disabled = true;
+
+  const promptText = `Tyutor: ${name}, Guruh: ${group}.
+Umumiy holat: ${general}.
+Muammolar: ${problems}.
+Tavsiyalar: ${suggestions}.
+Ushbu tyutor hisobotini tahlil qiling. Agar muammoli talabalar bo'lsa, ularning ro'yxatini va chora-tadbirlar rejasini tuzib, rasmiy xulosa bering.`;
+
+  let result = await queryGemini(promptText, "Sen oliy ta'lim muassasasida Rektorat va Tyutorlar o'rtasida ishlovchi AI koordinator-tahlilchisan. Rasmiy xulosa tuz.");
+
+  if (!result) {
+    result = `[TYUTOR HISOBOTI AI TAHLILI — ${currentUniv}]
+
+Guruh: ${group}
+Tyutor: ${name}
+
+Hisobot muvaffaqiyatli tahlil qilindi va quyidagi muhim ma'lumotlar aniqlandi:
+
+1. XAVFDAGI TALABALAR:
+- Karimov Sardor (IQ-21-01): 4 ta fandan qarzdor (Oilaviy muammo). Shoshilinch ravishda akademik yordam va tyutor maslahati talab etiladi.
+- Umarova Zulfiya (IQ-21-01): Davomad 50% (Sog'liq muammosi). Sababli hujjatlari tasdiqlansin.
+- Toshmatov Javlon: To'lov shartnomasida qiyinchilik (Moliya bo'limiga tavsiya yuborildi).
+
+2. KELGUSI QADAMLAR:
+- Hisobotdagi ma'lumotlar Rektor dashboardida integratsiya qilindi.
+- Muammolar bo'yicha Talabalar ishlari prorektoriga avtomatik signal yuborildi.`;
+  }
+
+  textDiv.innerHTML = result.replace(/\n/g, '<br>');
+  btn.disabled = false;
+  showNotify("Tyutor hisoboti Rektoratga taqdim etildi!");
+  
+  // Dashboarddagi ko'rsatkichni vaqtincha yangilash (interaktivlikni ko'rsatish)
+  document.getElementById('stat-tutor-reports').textContent = "96%";
+}
+
+// 🤖 AI Yig'ilish (Parallel Meeting) Simulyatsiyasi
+async function startYigilis() {
+  const savol = document.getElementById('yigilis-savol').value.trim();
+  if (!savol) {
+    alert("Iltimos, muhokama qilinadigan masalani yozing!");
+    return;
+  }
+
+  const container = document.getElementById('yigilis-results');
+  container.style.display = 'flex';
+  
+  const agents = ['oquv', 'yoshlar', 'ilmiy', 'talaba'];
+  
+  // Reset all cards and statuses
+  agents.forEach(id => {
+    const card = document.getElementById('chatcard-' + id);
+    const body = document.getElementById('chatbody-' + id);
+    const status = document.getElementById('status-lbl-' + id);
+    card.className = "agent-chat-card";
+    body.innerHTML = "Navbat kutilmoqda...";
+    status.className = "ni-badge badge-blue acc-status-lbl";
+    status.textContent = "Kutilmoqda";
+  });
+  
+  document.getElementById('chatcard-rektor').className = "agent-chat-card";
+  document.getElementById('chatcard-rektor').style.gridColumn = "1 / -1";
+  document.getElementById('chatcard-rektor').style.borderColor = "var(--gold)";
+  document.getElementById('chatbody-rektor').innerHTML = "Barcha prorektorlar hisoboti tayyor bo'lgandan so'ng umumiy yakuniy xulosa beriladi.";
+  document.getElementById('status-lbl-rektor').textContent = "Kutilmoqda";
+
+  const btn = document.getElementById('yigilisBtn');
+  btn.disabled = true;
+  btn.textContent = "⚙️ Yig'ilish davom etmoqda (Parallel AI tahlil)...";
+
+  // Har bir prorektor uchun savollar tayyorlash
+  const agentPrompts = {
+    oquv: `Sen ${UNIVERSITIES[currentUniv].name} O'quv ishlari prorektori AI agentsan. Quyidagi masala bo'yicha o'quv rejalar, kvotalar, dars jadvallari va akkreditatsiya nuqtai nazaridan tahlil va yechim ber: "${savol}"`,
+    yoshlar: `Sen ${UNIVERSITIES[currentUniv].name} Yoshlar masalalari va ma'naviy-ma'rifiy prorektori AI agentsan. Quyidagi masala bo'yicha talabalar faolligi, tadbirlar, to'garaklar, ijtimoiy-ma'naviy muhit nuqtai nazaridan tahlil va yechim ber: "${savol}"`,
+    ilmiy: `Sen ${UNIVERSITIES[currentUniv].name} Ilmiy ishlar prorektori AI agentsan. Quyidagi masala bo'yicha ilmiy tadqiqotlar, nashrlar, xalqaro reytinglar, grant loyihalari nuqtai nazaridan tahlil va yechim ber: "${savol}"`,
+    talaba: `Sen ${UNIVERSITIES[currentUniv].name} Talabalar masalalari prorektori AI agentsan. Quyidagi masala bo'yicha talabalar o'zlashtirishi, qarzdorliklar, dropout xavfini kamaytirish, stipendiyalar nuqtai nazaridan tahlil va yechim ber: "${savol}"`
+  };
+
+  const agentJavoblar = {};
+
+  // Agentlarning navbatma-navbat javob berishini simulyatsiya qilish (Vizual effekt uchun)
+  for (let i = 0; i < agents.length; i++) {
+    const id = agents[i];
+    const card = document.getElementById('chatcard-' + id);
+    const body = document.getElementById('chatbody-' + id);
+    const status = document.getElementById('status-lbl-' + id);
+    
+    // Aktiv holatga keltirish
+    card.classList.add('active-agent');
+    status.className = "ni-badge badge-orange acc-status-lbl";
+    status.textContent = "Tahlil qilmoqda...";
+    body.innerHTML = `<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+    
+    // Elementga avtomatik scroll qilish
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    let javob = await queryGemini(agentPrompts[id]);
+    
+    // Agar API ulanmagan bo'lsa (offline mock)
+    if (!javob) {
+      await new Promise(r => setTimeout(r, 1500)); // Simulyatsiya kutish vaqti
+      javob = getOfflineAgentResponse(id, savol);
+    }
+    
+    agentJavoblar[id] = javob;
+    
+    // Natijani yozish
+    body.innerHTML = javob.replace(/\n/g, '<br>');
+    card.classList.remove('active-agent');
+    card.classList.add('completed-agent');
+    status.className = "ni-badge badge-green acc-status-lbl";
+    status.textContent = "Tayyor";
+  }
+
+  // REKTOR YAKUNIY QARORI
+  const rektorCard = document.getElementById('chatcard-rektor');
+  const rektorBody = document.getElementById('chatbody-rektor');
+  const rektorStatus = document.getElementById('status-lbl-rektor');
+
+  rektorCard.classList.add('active-agent');
+  rektorStatus.textContent = "Xulosa qilmoqda...";
+  rektorBody.innerHTML = `<div class="typing-indicator"><div class="typing-dot" style="background:#fff"></div><div class="typing-dot" style="background:#fff"></div><div class="typing-dot" style="background:#fff"></div></div>`;
+  rektorCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  const rektorPrompt = `Sen ${UNIVERSITIES[currentUniv].name} Rektori AI agentsan.
+  Muhokama qilingan masala: "${savol}"
+  
+  Prorektorlarning bergan tahlillari:
+  1. O'quv prorektori: ${agentJavoblar.oquv}
+  2. Yoshlar prorektori: ${agentJavoblar.yoshlar}
+  3. Ilmiy prorektori: ${agentJavoblar.ilmiy}
+  4. Talabalar prorektori: ${agentJavoblar.talaba}
+  
+  Ushbu tahlillar asosida YAKUNIY STRATEGIK XULOSA va Rektorning TOP-3 buyruq topshiriqlarini O'zbek tilida tayyorlang.`;
+
+  let rektorXulosa = await queryGemini(rektorPrompt, "Sen oliy ta'lim tizimini raqamlashtirish bo'yicha yetakchi ekspert Rektorsan. Strategik va aniq buyruqlar ber.");
+
+  if (!rektorXulosa) {
+    await new Promise(r => setTimeout(r, 2000));
+    rektorXulosa = getOfflineRektorResponse(savol, agentJavoblar);
+  }
+
+  rektorBody.innerHTML = rektorXulosa.replace(/\n/g, '<br>');
+  rektorCard.classList.remove('active-agent');
+  rektorCard.classList.add('completed-agent');
+  rektorStatus.className = "ni-badge badge-green acc-status-lbl";
+  rektorStatus.style.background = "var(--green)";
+  rektorStatus.style.color = "#fff";
+  rektorStatus.textContent = "Yakunlandi";
+
+  btn.disabled = false;
+  btn.textContent = "🚀 Yig'ilishni Boshlash — 5 Agent Parallel Tahlil";
+  showNotify("AI Yig'ilish muvaffaqiyatli yakunlandi va strategik qaror qabul qilindi!");
+}
+
+// Offline simulyatsiya uchun prorektorlar mock javoblari generatori
+function getOfflineAgentResponse(id, savol) {
+  const responses = {
+    oquv: `[O'QUV ISHLARI PROREKTORI BAYONOTI — ${currentUniv}]
+Ushbu masalani dars rejalari va normativ talablar bo'yicha ko'rib chiqdik:
+1. Akademik yuklama: Agar o'quv jarayoniga qo'shimcha darslar kiritilsa, professor-o'qituvchilar yuklamasini qayta ko'rib chiqish lozim.
+2. Dars jadvallari: Masalani hal qilish uchun HEMIS platformasida fanlararo modullarni optimallashtiramiz.
+3. Akkreditatsiya xavfi: Hech qanday o'quv standartlari buzilmasligi ta'minlanadi.`,
+
+    yoshlar: `[YOSHLAR MASALALARI PROREKTORI BAYONOTI — ${currentUniv}]
+Ushbu masala bo'yicha talabalar muhiti va ularning ijtimoiy holatini o'rgandik:
+1. Ma'naviy va tarbiyaviy jihat: Talabalar o'rtasida tushuntirish ishlarini kuchaytiramiz.
+2. Yoshlar ittifoqi bilan hamkorlik: Talaba-yoshlar faollarini jalb qilib, norasmiy to'garaklar tashkil qilamiz.
+3. Psixologik monitoring: Akademik muammosi bor talabalar bilan shaxsiy uchrashuvlar rejalashtirildi.`,
+
+    ilmiy: `[ILMIY ISHLAR VA INNOVATSIYA PROREKTORI BAYONOTI — ${currentUniv}]
+Ushbu masalaga ilmiy yondashuv va innovatsion yechimlar bo'yicha takliflarimiz:
+1. Tahliliy model: Talabalarning o'zlashtirishini bashorat qiluvchi AI algoritmlarini sinab ko'rishimiz mumkin.
+2. Innovatsiyalar: Talabalar uchun loyihaga asoslangan o'qitish (Project-based learning) tizimini joriy etish orqali qiziqishni oshiramiz.
+3. Grant loyihalari: EdTech yo'nalishida ilmiy grantlar jalb etish orqali yangi laboratoriyalarni moliyalashtiramiz.`,
+
+    talaba: `[TALABALAR MASALALARI PROREKTORI BAYONOTI — ${currentUniv}]
+Talabalar o'zlashtirishi va ularga ijtimoiy yordam ko'rsatish nuqtai nazaridan takliflarimiz:
+1. Akademik qarzdorlar: O'zlashtirishi past bo'lgan talabalar uchun individual qayta topshirish rejalari tuzildi.
+2. Stipendiya va rag'batlantirish: Talabalarni moddiy qo'llab-quvvatlash uchun qo'shimcha stipendiyalar va grantlar ajratilsin.
+3. Yotoqxona nazorati: TTJ larda yashovchi talabalarning darsga qatnashishi tyutorlar bilan birga qat'iy nazoratga olindi.`
+  };
+  return responses[id] || "Tahlil tayyorlandi.";
+}
+
+// Offline simulyatsiya uchun rektor yakuniy qarori generatori
+function getOfflineRektorResponse(savol, agentJavoblar) {
+  return `[AI REKTOR STRATEGIK XULOSASI VA QARORI — ${currentUniv}]
+
+Yig'ilishda muhokama qilingan masala: "${savol}"
+
+Barcha prorektorlarimizning tahliliy hisobotlarini tinglab, quyidagi YAKUNIY QAROR qabul qilindi:
+
+1. 🎯 AKADEMIK YUKLAMA VA MONITORING (O'quv va Talabalar bo'limi):
+*Topshiriq:* HEMIS tizimidagi barcha akademik qarzdor talabalarga shaxsiy o'quv rejalari ishlab chiqilsin. Fakultet dekanlari har bir qarzdor talaba uchun mas'ul etib belgilansin. Tyutorlar haftalik davomad monitoringini Rektoratga to'g'ridan-to'g'ri taqdim etsin.
+
+2. 👥 IJTIMOIY QO'LLAB-QUVVATLASH VA RUHIY MUHIT (Yoshlar bo'limi):
+*Topshiriq:* Xavf guruhidagi talabalarga individual psixologik yordam tashkil etilsin. TTJ larda hamda darsdan tashqari vaqtlarda Yoshlar ittifoqi va iqtidorli talabalar ishtirokida to'garaklar joriy etilib, darsga bo'lgan rag'bat oshirilsin.
+
+3. 🔬 METODIK VA INNOVATSION YONDASHUV (Ilmiy bo'lim):
+*Topshiriq:* Talabalarning qiziqishlarini oshirish uchun an'anaviy ma'ruzalardan tashqari loyiha va amaliyotga asoslangan o'qitish formatiga bosqichma-bosqich o'tilsin.
+
+Ushbu qarorlarning bajarilishi yuzasidan nazoratni o'z zimmamda qoldiraman. Tizim orqali haftalik hisobotlar yuritilsin.`;
+}
+
+// OTM almashtirish va jadvalni to'ldirish boshlang'ich sozlamalari
+window.onload = function() {
+  document.getElementById('curDate').textContent = new Date().toLocaleDateString("uz-UZ") + " y.";
+  changeUniversity();
+};
+</script>
+
+</body>
+</html>
